@@ -1,0 +1,19 @@
+{
+  "name": "Master*pass",
+  "version": "0.1",
+  "description": "Remember one password. Stay secure.",
+  "icons" : {
+    "256": "img/icon256.png",
+    "128": "img/icon128.png",
+    "64": "img/icon64.png",
+    "48": "img/icon48.png"
+  },
+  "browser_action": {
+    "default_title": "Master*pass",
+    "default_icon": "img/icon.png",
+    "popup": "popup.html"
+  },
+  "permissions": [
+    "tabs", "http://*/*", "https://*/*"
+  ]
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="style/style.css">
+  </head>
+  <body>
+    <div id="content">
+      <form onsubmit="return false;">
+        <table>
+          <tr>
+            <th>
+              <label>Site</label>
+            </th>
+            <td>
+              <input id="site" type="text" spellcheck="false"></input>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label for="master">Master</label>
+            </th>
+            <td>
+              <input id="master" type="password" autofocus></input>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label>Password</label>
+            </th>
+            <td>
+              <input id="password" type="text" readonly spellcheck="false"></input>
+            </td>
+          </tr>
+          <tr>
+            <th></th>
+            <td class="buttons">
+              <button type="submit">Update</button>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+  </body>
+  <script type="text/javascript" src="script/jquery-1.6.1.min.js"></script>
+  <script type="text/javascript" src="script/crypto.js"></script>
+  <script type="text/javascript" src="script/sha256.js"></script>
+  <script type="text/javascript" src="script/hmac.js"></script>
+  <script type="text/javascript" src="script/pbkdf2.js"></script>
+  <script type="text/javascript" src="script/ascii85.js"></script>
+  <script type="text/javascript">
+    $(function() {
+      function extractSite(str) {
+        var regex = new RegExp('^(?:ftp|http|https)\://(?:www.)?([^/]+)', 'im');
+        return str.match(regex)[1].toString();
+      }
+
+      if (chrome.tabs) {
+        chrome.tabs.getSelected(null, function(tab) {
+          var site = extractSite(tab.url);
+          $('#site').val(site);
+        });
+      } else {
+        $('#site').val('masterpass.com');
+      }
+
+      function generatePassword() {
+        var master = $('#master').val();
+        var site = $('#site').val();
+
+        var salt = site;
+
+        var bytes = Crypto.PBKDF2(master, salt, 32, {
+          iterations: 5000, asBytes: true, hasher: Crypto.SHA256 });
+
+        return ascii85.encode(bytes).substring(0, 20);
+      }
+
+      $('#master').change(function() {
+        var password = generatePassword();
+        $('#password').val(password);
+      });
+
+      $('form').submit(function() {
+        var password = $('#password').val().replace("'", "\\'");
+        var code = "\
+          var inputs = document.getElementsByTagName('input'); \
+          for (var i = 0; i < inputs.length; i++) { \
+            if (inputs[i].type.toLowerCase() == 'password') { \
+              inputs[i].value = '" + password + "'; \
+            } \
+          }";
+
+        if (chrome.tabs) {
+          chrome.tabs.executeScript(null, { code: code });
+        } else {
+          alert('Updated: ' + password);
+        }
+
+        window.close();
+      });
+
+    });
+  </script>
+</html>
