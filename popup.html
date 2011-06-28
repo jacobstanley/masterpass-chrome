@@ -46,7 +46,7 @@
   <script type="text/javascript" src="script/sha256.js"></script>
   <script type="text/javascript" src="script/hmac.js"></script>
   <script type="text/javascript" src="script/pbkdf2.js"></script>
-  <script type="text/javascript" src="script/ascii85.js"></script>
+  <script type="text/javascript" src="script/base85.js"></script>
   <script type="text/javascript">
     $(function() {
       function extractSite(str) {
@@ -72,7 +72,7 @@
         var bytes = Crypto.PBKDF2(master, salt, 32, {
           iterations: 5000, asBytes: true, hasher: Crypto.SHA256 });
 
-        return ascii85.encode(bytes).substring(0, 20);
+        return base85.encode(bytes).substring(0, 20);
       }
 
       $('#master').change(function() {
